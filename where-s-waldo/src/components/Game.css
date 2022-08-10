@@ -1,0 +1,25 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+area {
+  cursor: pointer;
+}
+
+.menu {
+  list-style-type: none;
+}
+
+.off {
+  display: none;
+}
+
+li {
+  background-color: #fff;
+  padding: 3px;
+}
+
+li:hover {
+  background-color: rgb(152, 152, 152);
+}
