@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/odin_Where-s-Waldo/static/css/main.c5f034d7.css",
+    "main.js": "/odin_Where-s-Waldo/static/js/main.07b13a32.js",
+    "static/media/level-1.jpg": "/odin_Where-s-Waldo/static/media/level-1.8b871ac1382de68197ba.jpg",
+    "index.html": "/odin_Where-s-Waldo/index.html",
+    "main.c5f034d7.css.map": "/odin_Where-s-Waldo/static/css/main.c5f034d7.css.map",
+    "main.07b13a32.js.map": "/odin_Where-s-Waldo/static/js/main.07b13a32.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c5f034d7.css",
+    "static/js/main.07b13a32.js"
+  ]
+}
