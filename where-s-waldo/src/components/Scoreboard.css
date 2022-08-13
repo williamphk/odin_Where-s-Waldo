@@ -1,0 +1,22 @@
+.Scoreboard {
+  width: 20vw;
+  height: auto;
+  background-color: rgba(196, 196, 196, 0.858);
+  position: absolute;
+  left: 40%;
+  top: 30%;
+  border-radius: 15px;
+  font-size: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding-top: 5px;
+  padding-bottom: 20px;
+}
+
+.scoreboardTitle {
+  font-size: 30px;
+  font-weight: 700;
+}

@@ -1,11 +1,31 @@
 import "./Game.css";
+import Timer from "./Timer";
 import image from "./level-1.jpg";
 import React, { useEffect, useState } from "react";
 
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAyiiLmOkx6fBCYXo_BvPh2Gg-izxVgazc",
+  authDomain: "where-s-waldo-8b3a7.firebaseapp.com",
+  projectId: "where-s-waldo-8b3a7",
+  storageBucket: "where-s-waldo-8b3a7.appspot.com",
+  messagingSenderId: "16083200344",
+  appId: "1:16083200344:web:632192715ae1556bd61d2d",
+};
+
 function Game() {
-  const Waldo = { minX: 522, maxX: 550, minY: 358, maxY: 441 };
-  const Odlaw = { minX: 242, maxX: 256, minY: 363, maxY: 426 };
-  const Wizard = { minX: 628, maxX: 652, minY: 360, maxY: 415 };
+  const [Waldo, setWaldo] = useState({});
+  const [Odlaw, setOdlaw] = useState({});
+  const [Wizard, setWizard] = useState({});
+  //const Waldo = { minX: 522, maxX: 550, minY: 358, maxY: 441 };
+  // const Odlaw = { minX: 242, maxX: 256, minY: 363, maxY: 426 };
+  // const Wizard = { minX: 628, maxX: 652, minY: 360, maxY: 415 };
   const [mouseX, setMouseX] = useState(0);
   const [mouseY, setMouseY] = useState(0);
   const [imageX, setImageX] = useState(0);
@@ -16,6 +36,34 @@ function Game() {
   const [correctWaldo, setCorrectWaldo] = useState(false);
   const [correctOdlaw, setCorrectOdlaw] = useState(false);
   const [correctWizard, setCorrectWizard] = useState(false);
+  const [correctAll, setCorrectAll] = useState(false);
+  const [ratio, setRatio] = useState(0);
+  const [startTime, setStartTime] = useState(0);
+  const [finishTime, setFinishTime] = useState(0);
+  const [recordTime, setRecordTime] = useState(0);
+
+  useEffect(() => {
+    setStartTime(Date.now());
+  }, []);
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const docRefWaldo = doc(db, "map", "Waldo");
+      const docSnapWaldo = await getDoc(docRefWaldo);
+      const docRefOdlaw = doc(db, "map", "Odlaw");
+      const docSnapOdlaw = await getDoc(docRefOdlaw);
+      const docRefWizard = doc(db, "map", "Wizard");
+      const docSnapWizard = await getDoc(docRefWizard);
+      setWaldo(docSnapWaldo.data());
+      setOdlaw(docSnapOdlaw.data());
+      setWizard(docSnapWizard.data());
+    };
+    fetchData();
+  }, [db]);
 
   const menuStyle = {
     position: "absolute",
@@ -24,12 +72,15 @@ function Game() {
   };
 
   const handleImageClick = (e) => {
+    if (correctAll) return;
     e.preventDefault();
     setToggleMenu(!toggleMenu);
-    setImageX(e.pageX - e.target.offsetLeft);
-    setImageY(e.pageY - e.target.offsetTop);
+    let rect = e.target.getBoundingClientRect();
+    setImageX(e.clientX - rect.left);
+    setImageY(e.clientY - rect.top);
     setMouseX(e.clientX + 1);
     setMouseY(e.clientY + 1);
+    setRatio(e.target.clientWidth / 1024);
   };
 
   const handleMenuClick = (e) => {
@@ -38,20 +89,25 @@ function Game() {
   };
 
   useEffect(() => {
-    if (imageX > Waldo.minX && imageX < Waldo.maxX && imageY > Waldo.minY && imageY < Waldo.maxY) {
+    if (
+      imageX > Waldo.minX * ratio &&
+      imageX < Waldo.maxX * ratio &&
+      imageY > Waldo.minY * ratio &&
+      imageY < Waldo.maxY * ratio
+    ) {
       setClickCharacter("Waldo");
     } else if (
-      imageX > Odlaw.minX &&
-      imageX < Odlaw.maxX &&
-      imageY > Odlaw.minY &&
-      imageY < Odlaw.maxY
+      imageX > Odlaw.minX * ratio &&
+      imageX < Odlaw.maxX * ratio &&
+      imageY > Odlaw.minY * ratio &&
+      imageY < Odlaw.maxY * ratio
     ) {
       setClickCharacter("Odlaw");
     } else if (
-      imageX > Wizard.minX &&
-      imageX < Wizard.maxX &&
-      imageY > Wizard.minY &&
-      imageY < Wizard.maxY
+      imageX > Wizard.minX * ratio &&
+      imageX < Wizard.maxX * ratio &&
+      imageY > Wizard.minY * ratio &&
+      imageY < Wizard.maxY * ratio
     ) {
       setClickCharacter("Wizard");
     }
@@ -70,6 +126,7 @@ function Game() {
     Wizard.maxX,
     Wizard.minY,
     Wizard.maxY,
+    ratio,
   ]);
 
   useEffect(() => {
@@ -83,11 +140,20 @@ function Game() {
   }, [selection, clickCharacter]);
 
   useEffect(() => {
-    console.log(`selection ${selection}`, `clickCharacter ${clickCharacter}`, correctWaldo);
-  }, [selection, clickCharacter, correctWaldo]);
+    if (correctWaldo && correctOdlaw && correctWizard) {
+      setCorrectAll(true);
+      setFinishTime(Date.now());
+      setRecordTime(Math.abs((finishTime - startTime) / 1000).toFixed(2));
+    }
+  }, [correctOdlaw, correctWaldo, correctWizard, finishTime, startTime]);
+
+  useEffect(() => {
+    console.log(startTime, finishTime, recordTime);
+  }, [startTime, finishTime, recordTime]);
 
   return (
     <div className="Game">
+      {correctAll ? <Timer recordTime={recordTime} firebaseConfig={firebaseConfig} /> : null}
       <div>{correctWaldo ? "Waldo ✔" : null}</div>
       <div>{correctOdlaw ? "Odlaw ✔" : null}</div>
       <div>{correctWizard ? "Wizard ✔" : null}</div>
